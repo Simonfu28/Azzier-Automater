@@ -52,8 +52,12 @@ class Main(QtWidgets.QDialog):
         dataDivision = self.dataDivision.currentText()
         if self.generate.checkedButton() is not None:
             generate = self.generate.checkedButton().text()
+        else:
+            generate = ''
         if self.inactive.checkedButton() is not None:
             inactive = self.inactive.checkedButton().text()
+        else:
+            inactive = ''
         self.changeConfirm.show()
         self.changeConfirm.display()
 
@@ -75,13 +79,26 @@ class changeConfirm(QtWidgets.QDialog):
 
         self.changeList = self.findChild(QtWidgets.QListWidget, 'changeList')
 
+        buttonBox = QtWidgets.QDialogButtonBox(self)
+        buttonBox.accepted.connect(self.accept)
+
+    def accept(self):
+        login(config.get("Azzier", 'username'), config.get("Azzier", 'password'))
+        driver.switch_to.frame('mainmodule')
+        for i in range(len(pm_list)):
+            print(pm_list[i])
+            query()
+            search_pm(pm_list[i])
+        #driver.quit()
+
     def display(self):
         self.changeList.clear()
 
         pm_string = ', '.join(map(str, pm_list))
-        self.changeList.addItem("These PMs will be changed:\n" + pm_string + "\n")
-        # if inactive != '':
-        # self.changeList.addItem("These PMs will be inactivated:\n" + inactive + '\n')
+        if pm_string != '':
+            self.changeList.addItem("These PMs will be changed:\n" + pm_string + "\n")
+        if inactive != '':
+            self.changeList.addItem("These PMs will be inactivated:\n" + inactive + '\n')
         if priority != '':
             self.changeList.addItem("Priority will be set to:\n" + priority + "\n")
         if procedure != '':
@@ -90,8 +107,8 @@ class changeConfirm(QtWidgets.QDialog):
             self.changeList.addItem("Work type will be changed to:\n" + workType + '\n')
         if dataDivision != '':
             self.changeList.addItem("Data division will be changed to:\n" + dataDivision + '\n')
-        # if generate != '':
-            # self.changeList.addItem("Work orders will be generated:\n" + generate + '\n')
+        if generate != '':
+            self.changeList.addItem("Work orders will be generated:\n" + generate + '\n')
 
 
 def input_to_list(pm_input):
@@ -129,10 +146,15 @@ def login(username, password):
 
 def search_pm(pmnum):
     driver.implicitly_wait(5)
-    driver.switch_to.frame('mainmodule')
     pm_num = driver.find_element_by_id('txtpmnum')
     pm_num.send_keys(pmnum)
     pm_num.send_keys(Keys.ENTER)
+
+
+def query():
+    driver.implicitly_wait(5)
+    query = driver.find_element_by_xpath('/html/body/form/div[3]/div[3]/div/div/div/div/ul/li[1]')
+    query.click()
 
 
 def change_WOgeneration(bool):
