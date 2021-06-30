@@ -28,20 +28,28 @@ class Main(QtWidgets.QDialog):
 
         self.generate = self.findChild(QtWidgets.QButtonGroup, 'generate')
         self.generate.buttonClicked.connect(self.unselect)
+
         self.inactive = self.findChild(QtWidgets.QButtonGroup, 'inactive')
         self.inactive.buttonClicked.connect(self.unselect2)
 
-        self.generate1 = self.findChild(QtWidgets.QRadioButton, 'generate1')
-        self.generate2 = self.findChild(QtWidgets.QRadioButton, 'generate2')
-        self.generate3 = self.findChild(QtWidgets.QRadioButton, 'generate2')
-        self.inactive1 = self.findChild(QtWidgets.QRadioButton, 'inactive1')
-        self.inactive2 = self.findChild(QtWidgets.QRadioButton, 'inactive2')
+        self.priority = self.findChild(QtWidgets.QComboBox, 'priority')
+        self.procedure = self.findChild(QtWidgets.QComboBox, 'procedure')
+        self.workType = self.findChild(QtWidgets.QComboBox, 'workType')
+        self.dataDivision = self.findChild(QtWidgets.QComboBox, 'data_division')
 
         self.show()
 
     def accept(self):
-        s = self.input.text()
-        pm_list = input_to_list(s)
+        pm_list = input_to_list(self.input.text())
+        priority = self.priority.currentText()
+        procedure = self.procedure.currentText()
+        workType = self.workType.currentText()
+        dataDivision = self.dataDivision.currentText()
+        if self.generate.checkedButton is True:
+            generate = self.generate.checkedButton().text()
+        if self.inactive.checkedButton is True:
+            inactive = self.inactive.checkedButton().text()
+
 
     def unselect(self, radioButton):
         for button in self.generate.buttons():
@@ -54,15 +62,18 @@ class Main(QtWidgets.QDialog):
                 button.setChecked(False)
 
 
-
 def input_to_list(pm_input):
     if '-' in pm_input:
         t = re.split(r'-', pm_input)
+        z = len(t[0])
         t = [int(i) for i in t]
         num_range = range(t[0], t[1] + 1)
         s = list(num_range)
     else:
+        z = len(t[0])
         s = re.split(r',|, ', pm_input)
+    for x in s:
+        s = [str(i).zfill(z) for i in s]
     return s
 
 
