@@ -1,3 +1,4 @@
+import re
 import sys
 
 import selenium
@@ -23,10 +24,25 @@ class Main(QtWidgets.QDialog):
         buttonBox = QtWidgets.QDialogButtonBox(self)
         buttonBox.accepted.connect(self.accept)
 
+        self.input = self.findChild(QtWidgets.QLineEdit, 'pmNum')
+
         self.show()
 
     def accept(self):
-        print("s")
+        s = self.input.text()
+        t = input_to_list(s)
+        print(t)
+
+
+def input_to_list(input):
+    if '-' in input:
+        t = re.split(r'-', input)
+        t = [int(i) for i in t]
+        num_range = range(t[0], t[1] + 1)
+        s = list(num_range)
+    else:
+        s = re.split(r',|, ', input)
+    return s
 
 
 def login(username, password):
@@ -61,7 +77,6 @@ def change_WOgeneration(bool):
 
 
 def main():
-    #login('SFU', 'Maint123')
     app = QtWidgets.QApplication(sys.argv)
     window = Main()
     app.exec_()
