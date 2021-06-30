@@ -20,8 +20,8 @@ class Main(QtWidgets.QDialog):
         super(Main, self).__init__()   # call inherited class
         uic.loadUi('main.ui', self)    # Loads .ui file
 
-        buttonBox = QtWidgets.QDialogButtonBox()
-        buttonBox.accepted().connect(self.accept)
+        buttonBox = QtWidgets.QDialogButtonBox(self)
+        buttonBox.accepted.connect(self.accept)
 
         self.show()
 
