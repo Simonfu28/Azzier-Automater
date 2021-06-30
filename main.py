@@ -2,6 +2,7 @@ import re
 import sys
 
 import selenium
+from PyQt5.QtWidgets import QTreeWidgetItem
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
@@ -14,12 +15,13 @@ config = ConfigParser()
 config.read('config.cfg')
 
 global driver
+global pm_list, priority, procedure, workType, dataDivision, generate, inactive
 
 
 class Main(QtWidgets.QDialog):
     def __init__(self, parent=None):
-        super(Main, self).__init__()   # call inherited class
-        uic.loadUi('main.ui', self)    # Loads .ui file
+        super(Main, self).__init__()  # call inherited class
+        uic.loadUi('main.ui', self)  # Loads .ui file
 
         buttonBox = QtWidgets.QDialogButtonBox(self)
         buttonBox.accepted.connect(self.accept)
@@ -37,19 +39,23 @@ class Main(QtWidgets.QDialog):
         self.workType = self.findChild(QtWidgets.QComboBox, 'workType')
         self.dataDivision = self.findChild(QtWidgets.QComboBox, 'data_division')
 
+        self.changeConfirm = changeConfirm(self)
+
         self.show()
 
     def accept(self):
+        global pm_list, priority, procedure, workType, dataDivision, generate, inactive
         pm_list = input_to_list(self.input.text())
         priority = self.priority.currentText()
         procedure = self.procedure.currentText()
         workType = self.workType.currentText()
         dataDivision = self.dataDivision.currentText()
-        if self.generate.checkedButton is True:
+        if self.generate.buttonToggled is not None:
             generate = self.generate.checkedButton().text()
-        if self.inactive.checkedButton is True:
+        if self.inactive.checkedButton is not None:
             inactive = self.inactive.checkedButton().text()
-
+        self.changeConfirm.show()
+        self.changeConfirm.display()
 
     def unselect(self, radioButton):
         for button in self.generate.buttons():
@@ -63,9 +69,29 @@ class Main(QtWidgets.QDialog):
 
 
 class changeConfirm(QtWidgets.QDialog):
-    def __init__(self, parent=None):
-        super(changeConfirm, self).__init__()   # call inherited class
-        uic.loadUi('change_confirm.ui', self)    # Loads .ui file
+    def __init__(self, parent=Main):
+        super(changeConfirm, self).__init__()
+        uic.loadUi('change_confirm.ui', self)
+
+        self.changeList = self.findChild(QtWidgets.QListWidget, 'changeList')
+
+    def display(self):
+        self.changeList.clear()
+
+        pm_string = ', '.join(map(str, pm_list))
+        self.changeList.addItem("These PMs will be changed:\n" + pm_string + "\n")
+        # if inactive != '':
+        # self.changeList.addItem("These PMs will be inactivated:\n" + inactive + '\n')
+        if priority != '':
+            self.changeList.addItem("Priority will be set to:\n" + priority + "\n")
+        if procedure != '':
+            self.changeList.addItem("Procedure will be changed to:\n" + procedure + '\n')
+        if workType != '':
+            self.changeList.addItem("Work type will be changed to:\n" + workType + '\n')
+        if dataDivision != '':
+            self.changeList.addItem("Data division will be changed to:\n" + dataDivision + '\n')
+        # if generate != '':
+            # self.changeList.addItem("Work orders will be generated:\n" + generate + '\n')
 
 
 def input_to_list(pm_input):
@@ -76,10 +102,9 @@ def input_to_list(pm_input):
         num_range = range(t[0], t[1] + 1)
         s = list(num_range)
     else:
-        z = len(t[0])
         s = re.split(r',|, ', pm_input)
-    for x in s:
-        s = [str(i).zfill(z) for i in s]
+        z = len(s[0])
+    s = [str(i).zfill(z) for i in s]
     return s
 
 
