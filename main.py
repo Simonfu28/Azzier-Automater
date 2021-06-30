@@ -50,9 +50,9 @@ class Main(QtWidgets.QDialog):
         procedure = self.procedure.currentText()
         workType = self.workType.currentText()
         dataDivision = self.dataDivision.currentText()
-        if self.generate.buttonToggled is not None:
+        if self.generate.checkedButton() is not None:
             generate = self.generate.checkedButton().text()
-        if self.inactive.checkedButton is not None:
+        if self.inactive.checkedButton() is not None:
             inactive = self.inactive.checkedButton().text()
         self.changeConfirm.show()
         self.changeConfirm.display()
