@@ -62,6 +62,12 @@ class Main(QtWidgets.QDialog):
                 button.setChecked(False)
 
 
+class changeConfirm(QtWidgets.QDialog):
+    def __init__(self, parent=None):
+        super(changeConfirm, self).__init__()   # call inherited class
+        uic.loadUi('change_confirm.ui', self)    # Loads .ui file
+
+
 def input_to_list(pm_input):
     if '-' in pm_input:
         t = re.split(r'-', pm_input)
