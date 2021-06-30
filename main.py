@@ -1,5 +1,6 @@
 import re
 import sys
+import time
 
 import selenium
 from PyQt5.QtWidgets import QTreeWidgetItem
@@ -89,7 +90,12 @@ class changeConfirm(QtWidgets.QDialog):
             print(pm_list[i])
             query()
             search_pm(pm_list[i])
-        #driver.quit()
+            time.sleep(3)
+            setActivity(inactive)
+            print('1')
+            save()
+            time.sleep(3)
+        driver.quit()
 
     def display(self):
         self.changeList.clear()
@@ -145,16 +151,37 @@ def login(username, password):
 
 
 def search_pm(pmnum):
-    driver.implicitly_wait(5)
     pm_num = driver.find_element_by_id('txtpmnum')
-    pm_num.send_keys(pmnum)
-    pm_num.send_keys(Keys.ENTER)
+    if pmnum == '':
+        pass
+    else:
+        pm_num.send_keys(pmnum)
+        pm_num.send_keys(Keys.ENTER)
+
+
+def setActivity(bool):
+    inactivate = driver.find_element_by_id('rblinactive_0')
+    activate = driver.find_element_by_id('rblinactive_1')
+    if bool == 'Yes':
+        inactivate.click()
+    if bool == 'No':
+        activate.click()
+    if bool == '':
+        pass
 
 
 def query():
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(10)
     query = driver.find_element_by_xpath('/html/body/form/div[3]/div[3]/div/div/div/div/ul/li[1]')
     query.click()
+
+
+def save():
+
+    print('2')
+    save = driver.find_element_by_xpath('/html/body/form/div[3]/div[3]/div/div/div/div/ul/li[5]')
+    print('3')
+    save.click()
 
 
 def change_WOgeneration(bool):
