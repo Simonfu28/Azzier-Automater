@@ -26,22 +26,43 @@ class Main(QtWidgets.QDialog):
 
         self.input = self.findChild(QtWidgets.QLineEdit, 'pmNum')
 
+        self.generate = self.findChild(QtWidgets.QButtonGroup, 'generate')
+        self.generate.buttonClicked.connect(self.unselect)
+        self.inactive = self.findChild(QtWidgets.QButtonGroup, 'inactive')
+        self.inactive.buttonClicked.connect(self.unselect2)
+
+        self.generate1 = self.findChild(QtWidgets.QRadioButton, 'generate1')
+        self.generate2 = self.findChild(QtWidgets.QRadioButton, 'generate2')
+        self.generate3 = self.findChild(QtWidgets.QRadioButton, 'generate2')
+        self.inactive1 = self.findChild(QtWidgets.QRadioButton, 'inactive1')
+        self.inactive2 = self.findChild(QtWidgets.QRadioButton, 'inactive2')
+
         self.show()
 
     def accept(self):
         s = self.input.text()
-        t = input_to_list(s)
-        print(t)
+        pm_list = input_to_list(s)
+
+    def unselect(self, radioButton):
+        for button in self.generate.buttons():
+            if button is not radioButton:
+                button.setChecked(False)
+
+    def unselect2(self, radioButton):
+        for button in self.inactive.buttons():
+            if button is not radioButton:
+                button.setChecked(False)
 
 
-def input_to_list(input):
-    if '-' in input:
-        t = re.split(r'-', input)
+
+def input_to_list(pm_input):
+    if '-' in pm_input:
+        t = re.split(r'-', pm_input)
         t = [int(i) for i in t]
         num_range = range(t[0], t[1] + 1)
         s = list(num_range)
     else:
-        s = re.split(r',|, ', input)
+        s = re.split(r',|, ', pm_input)
     return s
 
 
