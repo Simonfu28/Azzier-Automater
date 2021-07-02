@@ -91,11 +91,16 @@ class changeConfirm(QtWidgets.QDialog):
     def accept(self):
         login(config.get("Azzier", 'username'), config.get("Azzier", 'password'))
         driver.switch_to.frame('mainmodule')
-        try:
-            overwrite()
-        except UnexpectedAlertPresentException:
-            driver.switch_to.alert.accept()
-            overwrite()
+        for i in range(len(pm_list)):
+            query()
+            search_pm(pm_list[i])
+            set_procedure(procedure)
+            set_priority(priority)
+            set_workType(workType)
+            setActivity(inactive)
+            change_WOgeneration(generate)
+            save()
+            time.sleep(1)
         driver.quit()
         self.close()
 
@@ -155,20 +160,6 @@ def login(username, password):
     login_button.click()
 
 
-# writes data to Azzier
-def overwrite():
-    for i in range(len(pm_list)):
-        query()
-        search_pm(pm_list[i])
-        set_procedure(procedure)
-        set_priority(priority)
-        set_workType(workType)
-        setActivity(inactive)
-        change_WOgeneration(generate)
-        save()
-        time.sleep(1)
-
-
 # searches the PM number in the Azzier PM window (has 1.5s delay)
 def search_pm(pmnum):
     pm_num = driver.find_element_by_id('txtpmnum')
@@ -179,7 +170,9 @@ def search_pm(pmnum):
         time.sleep(0.5)
         driver.find_element_by_id('txtequipment').click()
         pm_num.send_keys(Keys.ENTER)
-        time.sleep(1.5)
+        a = pm_num.get_attribute('value')
+        if a != pmnum:
+            search_pm(pmnum)
 
 
 # sets the priority of the PM
@@ -263,6 +256,7 @@ def save():
     except NoAlertPresentException:
         pass
     except UnexpectedAlertPresentException:
+        driver.implicitly_wait(5)
         driver.switch_to.alert.accept()
     finally:
         pass
