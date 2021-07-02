@@ -91,26 +91,11 @@ class changeConfirm(QtWidgets.QDialog):
     def accept(self):
         login(config.get("Azzier", 'username'), config.get("Azzier", 'password'))
         driver.switch_to.frame('mainmodule')
-        for i in range(len(pm_list)):
-            query()
-            search_pm(pm_list[i])
-            set_procedure(procedure)
-            set_priority(priority)
-            set_workType(workType)
-            setActivity(inactive)
-            change_WOgeneration(generate)
-            a = save()
-            time.sleep(1)
-            if a == 1:
-                query()
-                search_pm(pm_list[i])
-                set_procedure(procedure)
-                set_priority(priority)
-                set_workType(workType)
-                setActivity(inactive)
-                change_WOgeneration(generate)
-                a = save()
-                time.sleep(1)
+        try:
+            overwrite()
+        except UnexpectedAlertPresentException:
+            driver.switch_to.alert.accept()
+            overwrite()
         driver.quit()
         self.close()
 
@@ -170,7 +155,21 @@ def login(username, password):
     login_button.click()
 
 
-# searches the PM number in the Azzier PM window (has 2s delay)
+# writes data to Azzier
+def overwrite():
+    for i in range(len(pm_list)):
+        query()
+        search_pm(pm_list[i])
+        set_procedure(procedure)
+        set_priority(priority)
+        set_workType(workType)
+        setActivity(inactive)
+        change_WOgeneration(generate)
+        save()
+        time.sleep(1)
+
+
+# searches the PM number in the Azzier PM window (has 1.5s delay)
 def search_pm(pmnum):
     pm_num = driver.find_element_by_id('txtpmnum')
     if pmnum == '':
@@ -180,7 +179,7 @@ def search_pm(pmnum):
         time.sleep(0.5)
         driver.find_element_by_id('txtequipment').click()
         pm_num.send_keys(Keys.ENTER)
-    time.sleep(1.5)
+        time.sleep(1.5)
 
 
 # sets the priority of the PM
@@ -244,9 +243,14 @@ def change_WOgeneration(bool):
 
 # clicks the query button to search for a new PM
 def query():
-    driver.implicitly_wait(10)
-    query = driver.find_element_by_xpath('/html/body/form/div[3]/div[3]/div/div/div/div/ul/li[1]')
-    query.click()
+    try:
+        driver.implicitly_wait(10)
+        query = driver.find_element_by_xpath('/html/body/form/div[3]/div[3]/div/div/div/div/ul/li[1]')
+        query.click()
+    except UnexpectedAlertPresentException:
+        driver.switch_to.alert.accept()
+    finally:
+        pass
 
 
 # clicks the save button to save changes (has 2s delay)
@@ -256,12 +260,12 @@ def save():
     save.click()
     try:
         driver.switch_to.alert.accept()
-        return 0
     except NoAlertPresentException:
-        return 0
+        pass
     except UnexpectedAlertPresentException:
         driver.switch_to.alert.accept()
-        return 1
+    finally:
+        pass
 
 
 def main():
