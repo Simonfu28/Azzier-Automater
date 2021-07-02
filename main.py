@@ -177,9 +177,10 @@ def search_pm(pmnum):
         pass
     else:
         pm_num.send_keys(pmnum)
+        time.sleep(0.5)
         driver.find_element_by_id('txtequipment').click()
         pm_num.send_keys(Keys.ENTER)
-    time.sleep(2)
+    time.sleep(1.5)
 
 
 # sets the priority of the PM
@@ -259,7 +260,7 @@ def save():
     except NoAlertPresentException:
         return 0
     except UnexpectedAlertPresentException:
-        driver.switch_to.alert.cancel()
+        driver.switch_to.alert.accept()
         return 1
 
 
