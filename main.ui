@@ -97,12 +97,12 @@
      </item>
      <item>
       <property name="text">
-       <string>Mech PM</string>
+       <string>MECH PM</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Elec PM</string>
+       <string>ELEC PM</string>
       </property>
      </item>
     </widget>

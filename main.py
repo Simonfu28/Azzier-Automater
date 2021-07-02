@@ -5,6 +5,7 @@ import time
 import selenium
 from PyQt5.QtWidgets import QTreeWidgetItem
 from selenium import webdriver
+from selenium.common.exceptions import NoAlertPresentException
 from selenium.webdriver.common.keys import Keys
 
 import PyQt5
@@ -87,15 +88,16 @@ class changeConfirm(QtWidgets.QDialog):
         login(config.get("Azzier", 'username'), config.get("Azzier", 'password'))
         driver.switch_to.frame('mainmodule')
         for i in range(len(pm_list)):
-            print(pm_list[i])
+            #print(pm_list[i])
             query()
             search_pm(pm_list[i])
-            time.sleep(3)
+            set_proc(procedure)
+            set_workType(workType)
             setActivity(inactive)
-            print('1')
+            change_WOgeneration(generate)
             save()
-            time.sleep(3)
         driver.quit()
+        self.close()
 
     def display(self):
         self.changeList.clear()
@@ -156,7 +158,30 @@ def search_pm(pmnum):
         pass
     else:
         pm_num.send_keys(pmnum)
+        driver.find_element_by_id('txtequipment').click()
         pm_num.send_keys(Keys.ENTER)
+    time.sleep(1.5)
+
+
+def set_proc(proc):
+    proc_input = driver.find_element_by_id('txtprocnum')
+    craft = driver.find_element_by_id('txtcraft')
+    if proc == '':
+        pass
+    else:
+        proc_input.clear()
+        craft.clear()
+        proc_input.send_keys(proc)
+        driver.find_element_by_id('txtequipment').click()
+
+
+def set_workType(wtype):
+    wt_Input = driver.find_element_by_id('txtwotype')
+    if wtype == '':
+        pass
+    else:
+        wt_Input.clear()
+        wt_Input.send_keys(wtype)
 
 
 def setActivity(bool):
@@ -170,6 +195,17 @@ def setActivity(bool):
         pass
 
 
+def change_WOgeneration(bool):
+    WO_ondue = driver.find_element_by_id('rblondue_0')
+    WO_oncomplete = driver.find_element_by_id('rblondue_1')
+    if bool == 'On Due':
+        WO_ondue.click()
+    if bool == 'On Complete':
+        WO_oncomplete.click()
+    if bool == 'All' or '':
+        pass
+
+
 def query():
     driver.implicitly_wait(10)
     query = driver.find_element_by_xpath('/html/body/form/div[3]/div[3]/div/div/div/div/ul/li[1]')
@@ -177,15 +213,13 @@ def query():
 
 
 def save():
-
-    print('2')
     save = driver.find_element_by_xpath('/html/body/form/div[3]/div[3]/div/div/div/div/ul/li[5]')
-    print('3')
     save.click()
-
-
-def change_WOgeneration(bool):
-    WOgeneration = driver.find_element_by_id()
+    try:
+        driver.switch_to.alert.accept()
+    except NoAlertPresentException:
+        pass
+    time.sleep(1)
 
 
 def main():
