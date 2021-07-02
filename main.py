@@ -3,7 +3,6 @@ import sys
 import time
 
 import selenium
-from PyQt5.QtWidgets import QTreeWidgetItem
 from selenium import webdriver
 from selenium.common.exceptions import NoAlertPresentException
 from selenium.webdriver.common.keys import Keys
@@ -88,10 +87,10 @@ class changeConfirm(QtWidgets.QDialog):
         login(config.get("Azzier", 'username'), config.get("Azzier", 'password'))
         driver.switch_to.frame('mainmodule')
         for i in range(len(pm_list)):
-            #print(pm_list[i])
             query()
             search_pm(pm_list[i])
-            set_proc(procedure)
+            set_procedure(procedure)
+            set_priority(priority)
             set_workType(workType)
             setActivity(inactive)
             change_WOgeneration(generate)
@@ -160,10 +159,20 @@ def search_pm(pmnum):
         pm_num.send_keys(pmnum)
         driver.find_element_by_id('txtequipment').click()
         pm_num.send_keys(Keys.ENTER)
-    time.sleep(1.5)
+    time.sleep(2)
 
 
-def set_proc(proc):
+def set_priority(priority):
+    priority_input = driver.find_element_by_id('txtpriority')
+    if priority == '':
+        pass
+    else:
+        priority_input.clear()
+        priority_input.send_keys(priority)
+        driver.find_element_by_id('txtequipment').click()
+
+
+def set_procedure(proc):
     proc_input = driver.find_element_by_id('txtprocnum')
     craft = driver.find_element_by_id('txtcraft')
     if proc == '':
@@ -182,6 +191,7 @@ def set_workType(wtype):
     else:
         wt_Input.clear()
         wt_Input.send_keys(wtype)
+        driver.find_element_by_id('txtequipment').click()
 
 
 def setActivity(bool):
@@ -213,6 +223,7 @@ def query():
 
 
 def save():
+    time.sleep(0.5)
     save = driver.find_element_by_xpath('/html/body/form/div[3]/div[3]/div/div/div/div/ul/li[5]')
     save.click()
     try:
