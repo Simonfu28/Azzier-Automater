@@ -24,26 +24,27 @@ class Main(QtWidgets.QDialog):
         super(Main, self).__init__()  # call inherited class
         uic.loadUi('main.ui', self)  # Loads .ui file
 
-        buttonBox = QtWidgets.QDialogButtonBox(self)
+        buttonBox = QtWidgets.QDialogButtonBox(self)    # Ok/cancel buttons
         buttonBox.accepted.connect(self.accept)
 
-        self.input = self.findChild(QtWidgets.QLineEdit, 'pmNum')
+        self.input = self.findChild(QtWidgets.QLineEdit, 'pmNum')   # pm number input
 
-        self.generate = self.findChild(QtWidgets.QButtonGroup, 'generate')
+        self.generate = self.findChild(QtWidgets.QButtonGroup, 'generate')      # WO generation method
         self.generate.buttonClicked.connect(self.unselect)
 
-        self.inactive = self.findChild(QtWidgets.QButtonGroup, 'inactive')
+        self.inactive = self.findChild(QtWidgets.QButtonGroup, 'inactive')      # PM inactive or not
         self.inactive.buttonClicked.connect(self.unselect2)
 
-        self.priority = self.findChild(QtWidgets.QComboBox, 'priority')
+        self.priority = self.findChild(QtWidgets.QComboBox, 'priority')     # combo boxes for priority/procedure/work type/data divisions
         self.procedure = self.findChild(QtWidgets.QComboBox, 'procedure')
         self.workType = self.findChild(QtWidgets.QComboBox, 'workType')
         self.dataDivision = self.findChild(QtWidgets.QComboBox, 'data_division')
 
-        self.changeConfirm = changeConfirm(self)
+        self.changeConfirm = changeConfirm(self)    # defines the confirm window
 
         self.show()
 
+    # gets the data and opens confirm window
     def accept(self):
         global pm_list, priority, procedure, workType, dataDivision, generate, inactive
         pm_list = input_to_list(self.input.text())
@@ -62,27 +63,31 @@ class Main(QtWidgets.QDialog):
         self.changeConfirm.show()
         self.changeConfirm.display()
 
+    # only allows one radio button to be active
     def unselect(self, radioButton):
         for button in self.generate.buttons():
             if button is not radioButton:
                 button.setChecked(False)
 
+    # only allows one radio button to be active
     def unselect2(self, radioButton):
         for button in self.inactive.buttons():
             if button is not radioButton:
                 button.setChecked(False)
 
 
+# opens a confirmation window
 class changeConfirm(QtWidgets.QDialog):
     def __init__(self, parent=Main):
         super(changeConfirm, self).__init__()
         uic.loadUi('change_confirm.ui', self)
 
-        self.changeList = self.findChild(QtWidgets.QListWidget, 'changeList')
+        self.changeList = self.findChild(QtWidgets.QListWidget, 'changeList')   # line display box
 
-        buttonBox = QtWidgets.QDialogButtonBox(self)
+        buttonBox = QtWidgets.QDialogButtonBox(self)    # Y/N number
         buttonBox.accepted.connect(self.accept)
 
+    # opens Azzier window and makes changes
     def accept(self):
         login(config.get("Azzier", 'username'), config.get("Azzier", 'password'))
         driver.switch_to.frame('mainmodule')
@@ -98,6 +103,7 @@ class changeConfirm(QtWidgets.QDialog):
         driver.quit()
         self.close()
 
+    # displays what changes to be made
     def display(self):
         self.changeList.clear()
 
@@ -118,6 +124,7 @@ class changeConfirm(QtWidgets.QDialog):
             self.changeList.addItem("Work orders will be generated:\n" + generate + '\n')
 
 
+# turns the pm text input into a list of numbers
 def input_to_list(pm_input):
     if '-' in pm_input:
         t = re.split(r'-', pm_input)
@@ -132,6 +139,7 @@ def input_to_list(pm_input):
     return s
 
 
+# handles the Azzier login window
 def login(username, password):
     global driver
     # opens webpage
@@ -151,6 +159,7 @@ def login(username, password):
     login_button.click()
 
 
+# searches the PM number in the Azzier PM window (has 2s delay)
 def search_pm(pmnum):
     pm_num = driver.find_element_by_id('txtpmnum')
     if pmnum == '':
@@ -162,6 +171,7 @@ def search_pm(pmnum):
     time.sleep(2)
 
 
+# sets the priority of the PM
 def set_priority(priority):
     priority_input = driver.find_element_by_id('txtpriority')
     if priority == '':
@@ -172,6 +182,7 @@ def set_priority(priority):
         driver.find_element_by_id('txtequipment').click()
 
 
+# sets the procedure and craft of the PM
 def set_procedure(proc):
     proc_input = driver.find_element_by_id('txtprocnum')
     craft = driver.find_element_by_id('txtcraft')
@@ -184,6 +195,7 @@ def set_procedure(proc):
         driver.find_element_by_id('txtequipment').click()
 
 
+# sets the work type (PM/PR/RM..etc) of the PM
 def set_workType(wtype):
     wt_Input = driver.find_element_by_id('txtwotype')
     if wtype == '':
@@ -194,6 +206,7 @@ def set_workType(wtype):
         driver.find_element_by_id('txtequipment').click()
 
 
+# sets the PM as inactive or active
 def setActivity(bool):
     inactivate = driver.find_element_by_id('rblinactive_0')
     activate = driver.find_element_by_id('rblinactive_1')
@@ -205,6 +218,7 @@ def setActivity(bool):
         pass
 
 
+# changes the way work orders are generated
 def change_WOgeneration(bool):
     WO_ondue = driver.find_element_by_id('rblondue_0')
     WO_oncomplete = driver.find_element_by_id('rblondue_1')
@@ -216,12 +230,14 @@ def change_WOgeneration(bool):
         pass
 
 
+# clicks the query button to search for a new PM
 def query():
     driver.implicitly_wait(10)
     query = driver.find_element_by_xpath('/html/body/form/div[3]/div[3]/div/div/div/div/ul/li[1]')
     query.click()
 
 
+# clicks the save button to save changes (has 1.5s delay)
 def save():
     time.sleep(0.5)
     save = driver.find_element_by_xpath('/html/body/form/div[3]/div[3]/div/div/div/div/ul/li[5]')
