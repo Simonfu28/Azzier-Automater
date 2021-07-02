@@ -4,7 +4,7 @@ import time
 
 import selenium
 from selenium import webdriver
-from selenium.common.exceptions import NoAlertPresentException
+from selenium.common.exceptions import NoAlertPresentException, UnexpectedAlertPresentException
 from selenium.webdriver.common.keys import Keys
 
 import PyQt5
@@ -99,7 +99,18 @@ class changeConfirm(QtWidgets.QDialog):
             set_workType(workType)
             setActivity(inactive)
             change_WOgeneration(generate)
-            save()
+            a = save()
+            time.sleep(1)
+            if a == 1:
+                query()
+                search_pm(pm_list[i])
+                set_procedure(procedure)
+                set_priority(priority)
+                set_workType(workType)
+                setActivity(inactive)
+                change_WOgeneration(generate)
+                a = save()
+                time.sleep(1)
         driver.quit()
         self.close()
 
@@ -237,16 +248,19 @@ def query():
     query.click()
 
 
-# clicks the save button to save changes (has 1.5s delay)
+# clicks the save button to save changes (has 2s delay)
 def save():
-    time.sleep(0.5)
+    time.sleep(1)
     save = driver.find_element_by_xpath('/html/body/form/div[3]/div[3]/div/div/div/div/ul/li[5]')
     save.click()
     try:
         driver.switch_to.alert.accept()
+        return 0
     except NoAlertPresentException:
-        pass
-    time.sleep(1)
+        return 0
+    except UnexpectedAlertPresentException:
+        driver.switch_to.alert.cancel()
+        return 1
 
 
 def main():
