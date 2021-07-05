@@ -4,6 +4,7 @@ import time
 
 import selenium
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoAlertPresentException, UnexpectedAlertPresentException
 from selenium.webdriver.common.keys import Keys
 
@@ -14,6 +15,12 @@ from configparser import ConfigParser
 
 config = ConfigParser()
 config.read('config.cfg')
+
+option = Options()
+
+option.add_experimental_option("prefs", {
+    "profile.default_content_setting_values.notifications": 1
+})
 
 global driver
 global pm_list, priority, procedure, workType, dataDivision, generate, inactive
@@ -91,7 +98,10 @@ class changeConfirm(QtWidgets.QDialog):
     def accept(self):
         login(config.get("Azzier", 'username'), config.get("Azzier", 'password'))
         driver.switch_to.frame('mainmodule')
-        for i in range(len(pm_list)):
+        i = 0
+        a = len(pm_list)
+        print(a)
+        while i < a:
             query()
             search_pm(pm_list[i])
             set_procedure(procedure)
@@ -100,6 +110,9 @@ class changeConfirm(QtWidgets.QDialog):
             setActivity(inactive)
             change_WOgeneration(generate)
             save()
+            i = i + 1
+            if check(pm_list[i-1]) is False:
+                i = i-1
             time.sleep(1)
         driver.quit()
         self.close()
@@ -144,7 +157,7 @@ def input_to_list(pm_input):
 def login(username, password):
     global driver
     # opens webpage
-    driver = selenium.webdriver.Chrome(config.get("Azzier", 'chrome_webdriver'))
+    driver = selenium.webdriver.Chrome(options=option, executable_path=config.get("Azzier", 'chrome_webdriver'))
     driver.get(config.get("Azzier", "pm_URL"))
 
     # closes timeout popup
@@ -170,9 +183,7 @@ def search_pm(pmnum):
         time.sleep(0.5)
         driver.find_element_by_id('txtequipment').click()
         pm_num.send_keys(Keys.ENTER)
-        a = pm_num.get_attribute('value')
-        if a != pmnum:
-            search_pm(pmnum)
+        time.sleep(1)
 
 
 # sets the priority of the PM
@@ -184,6 +195,10 @@ def set_priority(priority):
         priority_input.clear()
         priority_input.send_keys(priority)
         driver.find_element_by_id('txtequipment').click()
+    try:
+        driver.switch_to.alert.accept()
+    except NoAlertPresentException:
+        pass
 
 
 # sets the procedure and craft of the PM
@@ -197,6 +212,10 @@ def set_procedure(proc):
         craft.clear()
         proc_input.send_keys(proc)
         driver.find_element_by_id('txtequipment').click()
+    try:
+        driver.switch_to.alert.accept()
+    except NoAlertPresentException:
+        pass
 
 
 # sets the work type (PM/PR/RM..etc) of the PM
@@ -208,6 +227,10 @@ def set_workType(wtype):
         wt_Input.clear()
         wt_Input.send_keys(wtype)
         driver.find_element_by_id('txtequipment').click()
+    try:
+        driver.switch_to.alert.accept()
+    except NoAlertPresentException:
+        pass
 
 
 # sets the PM as inactive or active
@@ -219,6 +242,10 @@ def setActivity(bool):
     if bool == 'No':
         activate.click()
     if bool == '':
+        pass
+    try:
+        driver.switch_to.alert.accept()
+    except NoAlertPresentException:
         pass
 
 
@@ -232,17 +259,20 @@ def change_WOgeneration(bool):
         WO_oncomplete.click()
     if bool == 'All' or '':
         pass
+    try:
+        driver.switch_to.alert.accept()
+    except NoAlertPresentException:
+        pass
 
 
 # clicks the query button to search for a new PM
 def query():
+    driver.implicitly_wait(10)
+    query = driver.find_element_by_xpath('/html/body/form/div[3]/div[3]/div/div/div/div/ul/li[1]')
     try:
-        driver.implicitly_wait(10)
-        query = driver.find_element_by_xpath('/html/body/form/div[3]/div[3]/div/div/div/div/ul/li[1]')
         query.click()
-    except UnexpectedAlertPresentException:
         driver.switch_to.alert.accept()
-    finally:
+    except NoAlertPresentException:
         pass
 
 
@@ -250,16 +280,26 @@ def query():
 def save():
     time.sleep(1)
     save = driver.find_element_by_xpath('/html/body/form/div[3]/div[3]/div/div/div/div/ul/li[5]')
-    save.click()
     try:
         driver.switch_to.alert.accept()
     except NoAlertPresentException:
         pass
-    except UnexpectedAlertPresentException:
-        driver.implicitly_wait(5)
+    try:
+        save.click()
         driver.switch_to.alert.accept()
-    finally:
+    except NoAlertPresentException:
         pass
+
+
+def check(pmnum):
+    pm_num = driver.find_element_by_id('txtpmnum')
+    a = pm_num.get_attribute('value')
+    print(a)
+    print(pmnum)
+    if a != pmnum:
+        return False
+    else:
+        return True
 
 
 def main():
