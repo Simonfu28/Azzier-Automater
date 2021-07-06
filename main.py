@@ -276,7 +276,7 @@ def query():
         pass
 
 
-# clicks the save button to save changes (has 2s delay)
+# clicks the save button to save changes (has 1s delay)
 def save():
     time.sleep(1)
     save = driver.find_element_by_xpath('/html/body/form/div[3]/div[3]/div/div/div/div/ul/li[5]')
